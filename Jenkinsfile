@@ -27,8 +27,10 @@ pipeline {
         stage('Install & Lint') {
             steps {
                 dir("${APP_DIR}") {
-                    sh 'npm ci'
-                    sh 'npm run lint'
+                    sh '''
+                        npm install
+                        npm run lint
+                    '''
                 }
             }
         }
