@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        APP_DIR        = 'webcastle-tools-main'
-        IMAGE_NAME     = 'credvault-app'
-        IMAGE_TAG      = "\-\"
+        APP_DIR    = 'webcastle-tools-main'
+        IMAGE_NAME = 'credvault-app'
+        IMAGE_TAG  = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
     }
 
     tools {
@@ -26,7 +26,7 @@ pipeline {
 
         stage('Install & Lint') {
             steps {
-                dir("\") {
+                dir("${APP_DIR}") {
                     sh 'npm ci'
                     sh 'npm run lint'
                 }
@@ -35,15 +35,15 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                dir("\") {
-                    sh "docker build -t \:\ -t \:latest ."
+                dir("${APP_DIR}") {
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest ."
                 }
             }
         }
 
         stage('Cleanup') {
             steps {
-                sh "docker rmi \:\ \:latest || true"
+                sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest || true"
             }
         }
     }
@@ -53,10 +53,10 @@ pipeline {
             cleanWs(deleteDirs: true, notFailBuild: true)
         }
         success {
-            echo "Pipeline succeeded for CredVault build #\."
+            echo "Pipeline succeeded for CredVault build #${env.BUILD_NUMBER}."
         }
         failure {
-            echo "Pipeline failed at stage: \"
+            echo "Pipeline failed at stage: ${env.STAGE_NAME}"
         }
     }
 }
